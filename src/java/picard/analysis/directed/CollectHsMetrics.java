@@ -45,14 +45,49 @@ import java.util.TreeSet;
  * @author Tim Fennell
  */
 @CommandLineProgramProperties(
-        usage = "Collects a set of Hybrid Selection specific metrics from an aligned SAM" +
-                "or BAM file. If a reference sequence is provided, AT/GC dropout metrics will " +
-                "be calculated, and the PER_TARGET_COVERAGE option can be used to output GC and " +
-                "mean coverage information for every target.",
-        usageShort = "Collects Hybrid Selection-specific metrics for a SAM or BAM file",
+        usage = CollectHsMetrics.USAGE_SUMMARY + CollectHsMetrics.USAGE_DETAILS,
+        usageShort = CollectHsMetrics.USAGE_SUMMARY,
         programGroup = Metrics.class
+
 )
 public class CollectHsMetrics extends CollectTargetedMetrics<HsMetrics, HsMetricCollector> {
+
+    static final String USAGE_SUMMARY = "Collects hybrid-selection (HS) specific metrics for a SAM or BAM file.  ";
+    static final String USAGE_DETAILS = "These metrics enable users to determine the efficacy of HS experiments.  " +
+            "In addition, if a reference sequence is provided, this program will calculate AT/GC dropout metrics and enable users to invoke the" +
+            " PER_TARGET_COVERAGE option to output both GC and mean coverage information for every target. <br /><br />" +
+            "" +
+            "Both CollectTargetedPCRMetrics and CalculateHybridSelection metrics share virtually identical program structures except " +
+            "for the name of their targeting mechanisms (e.g. bait set or amplicon set).  Both depend on the TargetMetricsCollector " +
+            "and collect metrics on all reads in the INPUT SAM/BAM file. <br /><br /> " +
+            "" +
+            "Hybrid selection (HS) enables targeted sequencing analysis via the capture of specified genomic DNA " +
+            "sequences <a href=\"http://www.nature.com/nbt/journal/v27/n2/abs/nbt.1523.html\"><strong>(doi:10.1038/nbt.1523)</strong></a>.  " +
+            "It is commonly used to characterize exon sequences from genomic DNA " +
+            "or filter out bacterial DNA sequences from clinical samples.  <br /><br /> " +
+            "" +
+            "The technique involves the capture of unique regions of genomic DNA (targets) using synthetic RNA baits." +
+            "   The baits are synthesized with biotinylated nucleotides to facilitate capture of bait:target hybrids on" +
+            " streptavidin beads.  The captured target sequences are amplified, sequenced, and processed for variant calling. <br /><br />" +
+            "" +
+            "This tool requires an aligned SAM or BAM file as well as bait and target interval_list files.  " +
+
+            "For information on interval lists, please see the documentation for IntervalListTools" +
+            "<a href=\"http://broadinstitute.github.io/picard/command-line-overview.html#IntervalListTools\"><strong> here</strong>.  </a>" +
+            "<p>CollectHsMetrics provides multiple outputs that are described in detail at the following link: " +
+            "<a href=\"http://broadinstitute.github.io/picard/picard-metric-definitions.html\"><strong>metrics definitions</strong></a>.</p>  " +
+            ""+
+            "<h4>Usage Example:</h4>"+
+            "<pre>" +
+            "java -jar picard.jar CollectHsMetrics \\<br />" +
+            "      I=input.bam \\<br />" +
+            "      O=hs_metrics.txt \\<br />" +
+            "      R=reference_sequence.fasta \\<br />" +
+            "      BAIT_INTERVALS=bait.interval_list \\<br />" +
+            "      TARGET_INTERVALS=target.interval_list" +
+            "</pre> "+
+            "<hr />";
+
 
     @Option(shortName = "BI", doc = "An interval list file that contains the locations of the baits used.", minElements=1)
     public List<File> BAIT_INTERVALS;

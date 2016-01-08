@@ -49,12 +49,69 @@ import java.util.List;
 import java.util.Set;
 
 @CommandLineProgramProperties(
-        usage = "Collect metrics about the alignment of RNA to various functional classes of loci in the genome:" +
-                "coding, intronic, UTR, intergenic, ribosomal. Also determines strand-specificity for strand-specific libraries.",
-        usageShort = "Produces RNA alignment metrics for a SAM or BAM file",
+        usage = CollectRnaSeqMetrics.USAGE_SUMMARY + CollectRnaSeqMetrics.USAGE_DETAILS,
+        usageShort = CollectRnaSeqMetrics.USAGE_SUMMARY,
         programGroup = Metrics.class
 )
 public class CollectRnaSeqMetrics extends SinglePassSamProgram {
+
+    static final String USAGE_SUMMARY = "Produces RNA alignment metrics for a SAM or BAM file.  ";
+    static final String USAGE_DETAILS = "<p>Program takes aligned RNA transcript sequences and determines the functional distribution of bases " +
+            "within the transcripts of a BAM file including the numbers and percentages of bases that are located within " +
+            "the untranslated region (UTR), introns, intergenic (sequences between " +
+            "discrete genes), as well peptide-coding sequences.  This tool also calculates quality metrics on the reads and the bases within" +
+            " the reads including the numbers of bases that pass the sequencing vendor's quality filters (PF_BASES).  " +
+            "For additional information on the PF metric, please see the GATK dictionary entry on" +
+            "<a href=\"http://gatkforums.broadinstitute.org/gatk/discussion/6329/pf-reads-illumina-chastity-filter\"><strong> (PF Reads/Illumina Chastity Filters)</strong>.  </a></p>" +
+            "" +
+            "Other metrics include the median coverage (depth), 5&apos;/3&apos; biases, and the numbers of reads with the correct/incorrect strand " +
+            "designation.  The 5&apos;/3&apos; biases represent the bias introduced by having a" +
+            " greater representation at one end of a transcript over another.  This bias is most often introduced during library construction resulting from " +
+            "e.g. incomplete activity of a reverse transcriptase.  For additional information, please see the following" +
+            "" +
+            "<a href=\"http://www.biostars.org/p/102812/#102815\"><strong> link</strong>.  </a>" +
+            "" +
+            "<p>Users must have a functional BAM file containing RNA transcripts generated from an aligner such as <a href=\"http://github.com/alexdobin/STAR\"><strong> STAR</strong></a>" +
+            " or <a href=\"http://github.com/infphilo/tophat\"><strong> TopHat</strong></a>.  Prior to input into CollectRnaSeqMetrics, BAM files should be validated using Picard's" +
+            "" +
+            "<a href=\"http://broadinstitute.github.io/picard/command-line-overview.html#ValidateSamFile\"><strong> ValidateSamFile</strong></a> tool."+
+            "" +
+            "" +
+            "" +
+            "<p>CollectRnaSeqMetrics also requires REF_FLAT file," +
+            " a tab-delimited file containing information about the location of " +
+            "RNA transcripts, exon start and stop sites, etc.  Please visit the following link for documentation on " +
+            " <a href=\"http://genome.ucsc.edu/FAQ/FAQformat.html\"> <strong>REF_FLAT</strong> </a> files and search the page for the phrase \"refFlat\".  " +
+            "" +
+            " To obtain genome-specific downloadable REF_FLAT files, please visit the link " +
+            "<a href=\"http://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/\"> <strong>here</strong></a>.</p>" +
+            "" +
+            "<p>If provided with an interval file identifying ribosomal sequences, it calculates numbers/percentages of ribosomal bases.  " +
+            "The following site contains a ribosomal sequence interval list for the " +
+            "<a href=\"http://gist.github.com/slowkow/b11c28796508f03cdf4b\"><strong>Hg19</strong></a> genomic build.  " +
+            "Note, you can copy and paste the contents from this file into a text editor to create your own ribosomal sequence interval file.  In addition, if you are not " +
+            "using Hg19, you can use Picard&#8217s " +
+            "" +
+            " <a href=\"http://broadinstitute.github.io/picard/command-line-overview.html#LiftOverIntervalList\"><strong> LiftOverIntervalList</strong></a> tool to lift the file over to another genomic build. </p>" +
+            "" +
+            "<pre>" +
+            "<h4>Usage example:</h4>" +
+            "java -jar picard.jar CollectRnaSeqMetrics \\<br />" +
+            "      I=input.bam \\<br />" +
+            "      O=output.RNA_Metrics \\<br />" +
+            "      REF_FLAT=ref_flat.txt \\<br />" +
+            "      STRAND=SECOND_READ_TRANSCRIPTION_STRAND \\<br />" +
+            "      RIBOSOMAL_INTERVALS=ribosomal.interval_list <br />" +
+            "</pre>" +
+
+
+            "<p>Users can invoke the &quotIGNORE_SEQUENCE&quot option to specify reads not be included in the analysis.</p>" +
+            "" +
+            "<p>For a complete description of the output metrics, please see " +
+            " <a href=\"http://broadinstitute.github.io/picard/picard-metric-definitions.html\"><strong>metrics definitions</strong></a>.</p>  " +
+            ""+
+    "<hr />";
+
     private static final Log LOG = Log.getInstance(CollectRnaSeqMetrics.class);
 
     @Option(doc="Gene annotations in refFlat form.  Format described here: http://genome.ucsc.edu/goldenPath/gbdDescriptionsOld.html#RefFlat")

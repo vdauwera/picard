@@ -46,15 +46,13 @@ public class IntervalListTools extends CommandLineProgram {
             "Both interval_list and VCF files are accepted as input. The interval_list file format is relatively simple" +
             " and reflects the SAM alignment format to a degree.  A SAM style header must be present in the file that " +
             "lists the sequence records against which the intervals are described.  After the header, the file then" +
-            " contains records, one per line in text format with the following" +
-            " values tab-separated: " +
-            "<pre>" +
-            "     -Sequence name (SN) <br />" +
-            "     -Start position (1-based)** <br />" +
-            "     -End position (1-based, end inclusive) <br />" +
-            "     -Strand (either + or -) <br />" +
-            "     -Interval name (ideally unique names for intervals)" +
-            "</pre>" +
+            " contains records, one per line in text format as shown below: " +
+
+            "<p><table> <tbody> <tr><th>Sequence name (SN)</th><th>Start position (1-based)</th><th>End position " +
+            "(1-based, end inclusive)</th><th>Strand (either + or -)</th><th>Interval name (an ideally unique name for the interval)</th></tr>" +
+            "<tr><td>Chr20</td><td>8113296</td><td>8113397</td><td>+</td><td>PLCB1-chr20-8113296-8113397</td></tr>" +
+            "<tr><td>Chr20</td><td>8608941</td><td>8609078</td><td>+</td><td>PLCB1-chr20-8608941-8609078</td></tr>" +
+            "</tbody></table></p>" +
             "The coordinate system of interval_list files is such that the first base or position in a sequence is position \"1\"." +
             "<h4>Usage example:</h4>" +
             "<pre>" +

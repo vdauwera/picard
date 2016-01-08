@@ -64,41 +64,46 @@ import java.util.Set;
 )
 public class CollectRrbsMetrics extends CommandLineProgram {
     static final String USAGE_SUMMARY = "Collect metrics from reduced representation bisulfite sequencing (RRBS) data.  ";
-    static final String USAGE_DETAILS = "This tool collect metrics for RRBS data, based on the methylation status of cytosine (C) " +
-            "bases in both CpG and non-CpG sites across all reads of a BAM/SAM file. For a brief primer on bisulfite sequencing and " +
-            "cytosine methylation, see the " +
-            "<a href='https://www.broadinstitute.org/gatk/guide/article?id=6330'>GATK Dictionary</a>." +
-            "<br /><br />" +
-            "" +
-            "Since cytosine methylation is not exclusive for CpG \"hotspots\", the CollectRrbsMetrics tool outputs a summary table " +
-            "indicating the number of CpG and non-CpG cytosines as well as their conversion C -> T (+ strand) or G -> A (- strand) " +
-            "rates. The tool also outputs the numbers of reads having no CpG sites, and the numbers of reads discarded from the " +
-            "analysis due to inadequate size or excessive numbers of mismatches." +
-            "<br /><br />" +
-            "The tool also provides a table containing detailed information on CpG occurrence frequency, CpG conversion frequencies " +
-            "[C -> T (+ strand) or G -> A (- strand)], and the specific locations of the CpG sites in the genome. The conversion " +
-            "frequency helps determines the methylation status of a CpG site." +
-            "<br /><br />" +
-            "Finally, the tool provides graphical representation of four metrics in the form of a \".pdf\" document. These metrics " +
-            "are the bisulfite conversion rate for CpG and non-CpG cytosines, a distribution of the numbers of CpG sites as a " +
-            "function of CpG conversion rate, the distribution of CpG sites by read coverage, and the numbers of reads discarded due " +
-            "to high numbers of mismatches or inadequate read size." +
-            "" +
-            "<h4>Usage example:</h4>" +
-            "<pre>" +
-            "java -jar picard.jar CollectRrbsMetrics \\<br />" +
-            "      I=input.bam \\<br />" +
-            "      M=rrbs_metrics \\<br />" +
-            "      R=reference_sequence.fasta" +
-            "</pre>" +
-            "<hr />" +
-            "" +
-            "Please see " +
-            "<a href='https://broadinstitute.github.io/picard/picard-metric-definitions.html#RrbsCpgDetailMetrics'>" +
-            "the RrbsCpgDetailMetrics documentation</a> and the " +
-            "<a href='https://broadinstitute.github.io/picard/picard-metric-definitions.html#RrbsSummaryMetrics'>" +
-            "the RrbsSummaryMetrics documentation</a>for detailed explanations of the output metrics." +
-            "<hr />";
+    static final String USAGE_DETAILS = "<p>This tool calculates and reports QC metrics for reduced representation bisulfite " +
+            "sequencing (RRBS) data and is based on the methylation status of cytosine (C) bases in both CpG and non-CpG sites across all " +
+            "reads of a BAM/SAM file.  For detailed information about RRBS, please see " +
+            "<a href=\"http://gatkforums.broadinstitute.org/gatk/discussion/6330/bisulfite-sequencing-cytosine-methylation?new=1\"><strong>RRBS.</strong></a></p>"+
+    "<p>This tool outputs metrics in both tabular and graphical forms including the bisulfite conversion rate for CpG and non-CpG cytosines," +
+            " a distribution of the numbers of CpG sites as a function of CpG conversion rate, the distribution of CpG sites by read coverage," +
+            " and the numbers of reads discarded due to high numbers of mismatches or inadequate read size.</p>"+
+    "<center><h3>Arguments</h3></center>"+
+    "<table><tbody><tr><th>Required</th><th>Type</th><th>Description</th></tr>"+
+
+    "<tr><td>INPUT (I)</td><td>File</td><td>The BAM or SAM file containing aligned reads. Must be coordinate sorted</td></tr>"+
+    "<tr><td>REFERENCE (R)</td><td>File</td><td>The reference sequence in a fasta formatted file</td></tr>"+
+    "<tr><td>METRICS_FILE_PREFIX (M)</td><td>String</td><td>Base name for output files"+
+
+    "<tr><th>Optional</th><th></th><th></th></tr>"+
+    "<tr><td>MINIMUM_READ_LENGTH</td><td>Integer</td><td>Minimum read length.  Default value: 5. This option can be set to 'null' to clear the default value</td></tr>"+
+    "<tr><td>C_QUALITY_THRESHOLD</td><td>Integer</td><td>Threshold for base quality of a C base before it is considered.  Default value: 20. " +
+            "This option can be set to 'null' to clear the default value</td></tr>"+
+    "<tr><td>NEXT_BASE_QUALITY_THRESHOLD</td><td>Integer	</td><td>Threshold for quality of a base next to a C before the C base is considered.  " +
+            "Default value: 10. This option can be set to 'null' to clear the default value</td></tr>"+
+    "<tr><td>MAX_MISMATCH_RATE</td><td>Double</td><td>Maximum percentage of mismatches in a read for it to be considered, with a range of" +
+            " 0-1 Default value: 0.1. This option can be set to 'null' to clear the default value</td></tr>"+
+    "<tr><td>SEQUENCE_NAMES</td><td>String</td><td>Set of sequence names to consider, if not specified all sequences will be used.  " +
+            "This option may be specified 0 or more times	</td></tr>"+
+    "<tr><td>ASSUME_SORTED (AS)</td><td>Boolean</td><td>If true, assume that the input file is coordinate sorted even if the " +
+            "header says otherwise.  Default value: false. This option can be set to 'null' to clear the default value. " +
+            "Possible values: {true, false}</td></tr>"+
+    "<tr><td>METRIC_ACCUMULATION_LEVEL (LEVEL)</td><td>Boolean</td><td>The level(s) at which to accumulate metrics.  " +
+            "Possible values: {ALL_READS, SAMPLE, LIBRARY, READ_GROUP} This option may be specified 0 or more times. " +
+            "This option can be set to 'null' to clear the default list</td></tr>"+
+    "</tbody></table>"+
+    "<h4>Usage example:</h4>"+
+    "<pre>java -jar picard.jar CollectRrbsMetrics \\<br>      I=myBAM.bam \\<br>      M=metrics.rrbsmetrics \\<br>      R=reference.fasta</pre>"+
+
+    "For detailed descriptions of the output metrics, please see: " +
+            "<a href=\"http://broadinstitute.github.io/picard/picard-metric-definitions.html#RrbsCpgDetailMetrics\">"+
+            "<strong>RrbsCpgDetailMetrics</strong></a> and "+
+            "a href=\"http://broadinstitute.github.io/picard/picard-metric-definitions.html#RrbsSummaryMetrics\">" +
+                    "<strong>RrbsSummaryMetrics</strong></a>"+
+    "";
 
 // Path to R file for plotting purposes
 

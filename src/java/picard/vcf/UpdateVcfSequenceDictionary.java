@@ -51,12 +51,28 @@ import java.io.File;
  *
  */
 @CommandLineProgramProperties(
-        usage = "Takes a VCF and a second file that contains a sequence dictionary and updates the VCF with the new sequence dictionary.",
-        usageShort = "Takes a VCF and a second file that contains a sequence dictionary and updates the VCF with the new sequence dictionary.",
+        usage = UpdateVcfSequenceDictionary.USAGE_SUMMARY + UpdateVcfSequenceDictionary.USAGE_DETAILS,
+        usageShort = UpdateVcfSequenceDictionary.USAGE_SUMMARY,
         programGroup = VcfOrBcf.class
 )
 public class UpdateVcfSequenceDictionary extends CommandLineProgram {
-     @Option(shortName = StandardOptionDefinitions.INPUT_SHORT_NAME, doc = "Input VCF")
+
+    static final String USAGE_SUMMARY = "Takes a VCF and a second file that contains a sequence dictionary and updates the VCF with the new " +
+            "sequence dictionary.";
+    static final String USAGE_DETAILS ="Updates a VCF file with a new sequence dictionary.  This tool ensures file compatibility between multiple VCFs." +
+            "It is particularly useful prior to using the MergeVcf and SortVcf tools, especially if the VCF files come from different sources." +
+            "Accepts sequence dictionary files in multiple formats including (SAM, BAM, VCF, BCF, Interval List, Fasta, or Dict)." +
+
+    "<h4>Usage example:</h4>" +
+            "<pre>" +
+            "java -jar picard.jar UpdateVcfSequenceDictionary \\<br />" +
+            "     I=input.vcf \\<br />" +
+            "     O=updated.vcf \\<br />" +
+            "     SD=reference.dict \\<br />" +
+            "</pre>" +
+            "<hr />";
+
+    @Option(shortName = StandardOptionDefinitions.INPUT_SHORT_NAME, doc = "Input VCF")
     public File INPUT;
 
     @Option(shortName = StandardOptionDefinitions.OUTPUT_SHORT_NAME, doc = "Output VCF to be written.")

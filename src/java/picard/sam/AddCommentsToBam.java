@@ -38,8 +38,7 @@ public class AddCommentsToBam extends CommandLineProgram {
             "      C=comment_1 \\<br />" +
             "      C=\"comment 2\"" +
             "</pre>" +
-            "" +
-            "<hr />";
+            "" ;
     @Option(shortName = StandardOptionDefinitions.INPUT_SHORT_NAME, doc = "Input BAM file to add a comment to the header")
     public File INPUT;
 
