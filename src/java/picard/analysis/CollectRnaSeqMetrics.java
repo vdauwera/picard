@@ -90,7 +90,7 @@ public class CollectRnaSeqMetrics extends SinglePassSamProgram {
             "The following site contains a ribosomal sequence interval list for the " +
             "<a href=\"http://gist.github.com/slowkow/b11c28796508f03cdf4b\"><strong>Hg19</strong></a> genomic build.  " +
             "Note, you can copy and paste the contents from this file into a text editor to create your own ribosomal sequence interval file.  In addition, if you are not " +
-            "using Hg19, you can use Picard&#8217s " +
+            "using Hg19, you can use Picard's " +
             "" +
             " <a href=\"http://broadinstitute.github.io/picard/command-line-overview.html#LiftOverIntervalList\"><strong> LiftOverIntervalList</strong></a> tool to lift the file over to another genomic build. </p>" +
             "" +
