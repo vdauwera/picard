@@ -178,19 +178,19 @@ public class CommandLineParser {
     private int maxPositionalArguments;
 
     // List of all the data members with @Option annotation
-    private final List<OptionDefinition> optionDefinitions = new ArrayList<OptionDefinition>();
+    private final List<OptionDefinition> optionDefinitions = new ArrayList<>();
 
     // Maps long name, and short name, if present, to an option definition that is
     // also in the optionDefinitions list.
-    private final Map<String, OptionDefinition> optionMap = new HashMap<String, OptionDefinition>();
+    private final Map<String, OptionDefinition> optionMap = new HashMap<>();
 
     // Maps child options prefix to CommandLineParser for the child object.
     // Key: option prefix.
-    private final Map<String, CommandLineParser> childOptionsMap = new LinkedHashMap<String, CommandLineParser>();
+    private final Map<String, CommandLineParser> childOptionsMap = new LinkedHashMap<>();
 
     // Holds the command-line arguments for a child option parser.
     // Key: option prefix.  Value: List of arguments for child corresponding to that prefix (with prefix stripped).
-    private final MultiMap<String, ChildOptionArg> childOptionArguments = new MultiMap<String, ChildOptionArg>();
+    private final MultiMap<String, ChildOptionArg> childOptionArguments = new MultiMap<>();
 
     // For printing error messages when parsing command line.
     private PrintStream messageStream;
@@ -303,8 +303,11 @@ public class CommandLineParser {
      * @param stream Where to write the usage message.
      */
     public void usage(final PrintStream stream, final boolean printCommon) {
+
         if (prefix.isEmpty()) {
-            stream.print(convertFromHtml(getStandardUsagePreamble(callerOptions.getClass()) + getUsagePreamble()));
+            final String prefix = getStandardUsagePreamble(callerOptions.getClass()) + getUsagePreamble();
+            checkForNonASCII(prefix, "prefix");
+            stream.print(convertFromHtml(prefix));
             stream.println("\nVersion: " + getVersion());
             stream.println("\n\nOptions:\n");
 
@@ -344,30 +347,35 @@ public class CommandLineParser {
         }
     }
 
-    private void checkForNonASCII(String documentationText, String location) {
+    static void checkForNonASCII(String documentationText, String location) {
         if (!CharMatcher.ASCII.matchesAllOf(documentationText)) {
-            throw new AssertionError("Non-ASCII character used in documentation of "+callerOptions.getClass().getSimpleName()+" ("+location+"). Only ASCII characters are allowed.");
+            throw new AssertionError("Non-ASCII character used in documentation ("+location+"). Only ASCII characters are allowed.");
+        }
+        //make sure that html-encoded non-ascii characters are found as well
+        if (documentationText.matches(".*&[a-zA-Z]*?;.*")){
+            throw new AssertionError("Non-ASCII character used in documentation ("+location+"). Only ASCII characters are allowed.");
         }
     }
+    // package local for testing
+    static String convertFromHtml(final String textToConvert) {
 
-    private String convertFromHtml(final String textToConvert) {
+        final LinkedHashMap<String,String> regexps = new LinkedHashMap<>(); //linked hashmap for preserved order
 
-        final String regex1 = "<br />|<p>|</p>|<table>|</table >|<a href='(.*)'>(.*)</a>|<h4>|<pre>|</pre>|<ul>|</ul>|</li>|</tr>|<hr />";
-        final String regex2 = "<li>";
-        final String regex3 = "</th>";
-        final String regex4 = "</h4>|<tbody>|</tbody>|<tr>|<th>|<.*?>";
+        regexps.put("</ *(br|p|table|h[1-4]|pre|hr|li|ul) *>","\n");
+        regexps.put("< *(br|p|table|h[1-4]|pre|hr|li|ul) */>","\n");
+        regexps.put("< *(p|table|h[1-4]|ul|pre) *>","\n");
+        regexps.put("<li>", " - ");
+        regexps.put("</th>", "\t");
+        regexps.put("<.*?>", "");
 
-        return textToConvert
-                .replaceAll(regex1, "\n")
-                .replaceAll(regex2, " - ")
-                .replaceAll(regex3, "\t")
-                .replaceAll(regex4, "");
+        return regexps.entrySet().stream()
+                .reduce(textToConvert, (string, entrySet) -> string.replaceAll(entrySet.getKey(), entrySet.getValue()), (a, b) -> b);
     }
 
     private Collection<CommandLineParser> getChildParsersForHelp() {
         final Collection<CommandLineParser> childClps;
         if (isCommandLineProgram()) {
-            childClps = new ArrayList<CommandLineParser>();
+            childClps = new ArrayList<>();
             for (final Map.Entry<String, Object> entry :
                     ((CommandLineProgram) callerOptions).getNestedOptionsForHelp().entrySet()) {
                 if (entry.getKey().contains(".")) {
@@ -811,7 +819,9 @@ public class CommandLineParser {
             numSpaces = OPTION_COLUMN_WIDTH;
         }
         printSpaces(stream, numSpaces);
-        final String wrappedDescription = StringUtil.wordWrap(optionDescription, DESCRIPTION_COLUMN_WIDTH);
+        checkForNonASCII(optionDescription, name);
+
+        final String wrappedDescription = StringUtil.wordWrap(convertFromHtml(optionDescription), DESCRIPTION_COLUMN_WIDTH);
         final String[] descriptionLines = wrappedDescription.split("\n");
         for (int i = 0; i < descriptionLines.length; ++i) {
             if (i > 0) {
