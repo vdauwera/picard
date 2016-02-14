@@ -27,6 +27,7 @@ import com.google.common.base.CharMatcher;
 import htsjdk.samtools.util.CloserUtil;
 import htsjdk.samtools.util.CollectionUtil.MultiMap;
 import htsjdk.samtools.util.StringUtil;
+import picard.PicardException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -49,8 +50,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import picard.PicardException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Annotation-driven utility for parsing command-line arguments, checking for errors, and producing usage message.
@@ -235,7 +236,7 @@ public class CommandLineParser {
         if (null != this.programVersion && 0 < this.programVersion.length()) {
             usagePreamble += "Version: " + getVersion() + "\n";
         }
-        checkForNonASCII(usagePreamble, "preamble");
+        //checkForNonASCII(usagePreamble, "preamble");
 
         return usagePreamble;
     }
@@ -285,7 +286,7 @@ public class CommandLineParser {
     }
 
     private static List<Field> getAllFields(Class clazz) {
-        final List<Field> ret = new ArrayList<Field>();
+        final List<Field> ret = new ArrayList<>();
         do {
             ret.addAll(Arrays.asList(clazz.getDeclaredFields()));
             clazz = clazz.getSuperclass();
@@ -305,9 +306,9 @@ public class CommandLineParser {
     public void usage(final PrintStream stream, final boolean printCommon) {
 
         if (prefix.isEmpty()) {
-            final String prefix = getStandardUsagePreamble(callerOptions.getClass()) + getUsagePreamble();
+            final String prefix = htmlUnescape(convertFromHtml(getStandardUsagePreamble(callerOptions.getClass()) + getUsagePreamble()));
             checkForNonASCII(prefix, "prefix");
-            stream.print(convertFromHtml(prefix));
+            stream.print(prefix);
             stream.println("\nVersion: " + getVersion());
             stream.println("\n\nOptions:\n");
 
@@ -317,9 +318,7 @@ public class CommandLineParser {
         }
 
         if (!optionDefinitions.isEmpty()) {
-            for (final OptionDefinition optionDefinition : optionDefinitions) {
-                if (printCommon || !optionDefinition.isCommon) printOptionUsage(stream, optionDefinition);
-            }
+            optionDefinitions.stream().filter(optionDefinition -> printCommon || !optionDefinition.isCommon).forEach(optionDefinition -> printOptionUsage(stream, optionDefinition));
         }
 
         if (printCommon) {
@@ -340,11 +339,9 @@ public class CommandLineParser {
         }
 
         // Generate usage for child parsers.
-        final Collection<CommandLineParser> childClps;
-        childClps = getChildParsersForHelp();
-        for (final CommandLineParser childClp : childClps) {
-            childClp.usage(stream, printCommon);
-        }
+        getChildParsersForHelp()
+                .stream()
+                .forEach(childClp -> childClp.usage(stream, printCommon));
     }
 
     static void checkForNonASCII(String documentationText, String location) {
@@ -352,14 +349,15 @@ public class CommandLineParser {
             throw new AssertionError("Non-ASCII character used in documentation ("+location+"). Only ASCII characters are allowed.");
         }
         //make sure that html-encoded non-ascii characters are found as well
-        if (documentationText.matches(".*&[a-zA-Z]*?;.*")){
+        if ( Pattern.compile(".*&[a-zA-Z]*?;.*",Pattern.MULTILINE).matcher(documentationText).find()) {
             throw new AssertionError("Non-ASCII character used in documentation ("+location+"). Only ASCII characters are allowed.");
         }
     }
     // package local for testing
     static String convertFromHtml(final String textToConvert) {
 
-        final LinkedHashMap<String,String> regexps = new LinkedHashMap<>(); //linked hashmap for preserved order
+        //LinkedHashmap since the order matters
+        final Map<String,String> regexps = new LinkedHashMap<>();
 
         regexps.put("</ *(br|p|table|h[1-4]|pre|hr|li|ul) *>","\n");
         regexps.put("< *(br|p|table|h[1-4]|pre|hr|li|ul) */>","\n");
@@ -368,7 +366,7 @@ public class CommandLineParser {
         regexps.put("</th>", "\t");
         regexps.put("<.*?>", "");
 
-        return regexps.entrySet().stream()
+        return regexps.entrySet().stream().sequential()
                 .reduce(textToConvert, (string, entrySet) -> string.replaceAll(entrySet.getKey(), entrySet.getValue()), (a, b) -> b);
     }
 
@@ -395,7 +393,7 @@ public class CommandLineParser {
         stream.println("<a id=\"" + programName + "\"/>");
         stream.println("<h3>" + programName + "</h3>");
         stream.println("<section>");
-        stream.println("<p>" + getUsagePreamble() + "</p>");
+        stream.println("<p>" + htmlEscape(getUsagePreamble()) + "</p>");
         boolean hasOptions = false;
         for (final OptionDefinition optionDefinition : optionDefinitions) {
             if (!optionDefinition.isCommon || printCommon) {
@@ -440,14 +438,23 @@ public class CommandLineParser {
         for (final CommandLineParser childParser : getChildParsersForHelp()) {
             childParser.htmlPrintOptionTableRows(stream, false);
         }
-
     }
 
-    private static String htmlEscape(String str) {
+    private static final Map<String, String> htmlToText = new LinkedHashMap<String, String>(){{
+        put("<","&lt;");
+        put("\n","<p>");
+    }};
+
+    static String htmlEscape(String str) {
         // May need more here
-        str = str.replaceAll("<", "&lt;");
-        str = str.replaceAll("\n", "\n<p>");
-        return str;
+        return htmlToText.entrySet().stream().sequential()
+                .reduce(str, (string, entrySet) -> string.replace(entrySet.getKey(), entrySet.getValue()), (a, b) -> b);
+    }
+
+    static String htmlUnescape(String str) {
+        // May need more here
+        return htmlToText.entrySet().stream().sequential()
+                .reduce(str, (string, entrySet) -> string.replace(entrySet.getValue(), entrySet.getKey()), (a, b) -> b);
     }
 
     /**
@@ -478,7 +485,6 @@ public class CommandLineParser {
                 messageStream.println(getVersion());
                 return false;
             }
-
 
             final String[] pair = arg.split("=", 2);
             if (pair.length == 2 && pair[1].length() == 0) {
@@ -557,8 +563,8 @@ public class CommandLineParser {
                     }
                     return false;
                 }
-
             }
+
             if (positionalArguments != null) {
                 final Collection c = (Collection) positionalArguments.get(callerOptions);
                 if (c.size() < minPositionalArguments) {
@@ -591,8 +597,6 @@ public class CommandLineParser {
             // Should never happen because lack of publicness has already been checked.
             throw new RuntimeException(e);
         }
-
-
     }
 
     private boolean parsePositionalArgument(final String stringValue) {
@@ -1148,14 +1152,12 @@ public class CommandLineParser {
         String getHelpDoc();
     }
 
-    
     protected static class OptionDefinitionByPrintOrderComparator implements Comparator<OptionDefinition> {
 
-		@Override
-		public int compare(OptionDefinition o1, OptionDefinition o2) {
-			return o1.printOrder - o2.printOrder;
-		}
-    	
+        @Override
+        public int compare(OptionDefinition o1, OptionDefinition o2) {
+            return o1.printOrder - o2.printOrder;
+        }
     }
     
     protected static class OptionDefinition {

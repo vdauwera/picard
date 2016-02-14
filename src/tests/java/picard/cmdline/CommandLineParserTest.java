@@ -29,6 +29,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import picard.cmdline.programgroups.Testing;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -982,6 +983,28 @@ public class CommandLineParserTest {
     }
 
 
+    @DataProvider(name = "testHtmlEscapeData")
+    public Object[][] testHtmlEscapeData() {
+        final List<Object[]> retval = new ArrayList<>();
+
+        retval.add(new Object[]{"<", "&lt;"});
+        retval.add(new Object[]{"x<y", "x&lt;y"});
+        retval.add(new Object[]{"x<y<z", "x&lt;y&lt;z"});
+        retval.add(new Object[]{"\n", "<p>"});
+
+        return retval.toArray(new Object[0][]);
+    }
+
+    @Test(dataProvider = "testHtmlEscapeData")
+    public void testHtmlEscape(final String text, final String expected) {
+        Assert.assertEquals(CommandLineParser.htmlEscape(text), expected);
+    }
+
+    @Test(dataProvider = "testHtmlEscapeData")
+    public void testHtmlUnescape(final String expected, final String html) {
+        Assert.assertEquals(CommandLineParser.htmlUnescape(html), expected);
+    }
+
     @DataProvider(name = "testHTMLConverter")
     public Object[][] testHTMLConverterData() {
         final List<Object[]> retval = new ArrayList<>();
@@ -1011,8 +1034,10 @@ public class CommandLineParserTest {
                 "Please see <a href='http://broadinstitute.github.io/picard/picard-metric-definitions.html#AlignmentSummaryMetrics'>" +
                 "the AlignmentSummaryMetrics documentation</a> for detailed explanations of each metric. <br /> <br />" +
                 "Additional information about Illumina's quality filters can be found in the following documents on the Illumina website:" +
-                "<ul><li>http://support.illumina.com/content/dam/illumina-marketing/documents/products/technotes/hiseq-x-percent-pf-technical-note-770-2014-043.pdf</li>" +
-                "<li>http://support.illumina.com/content/dam/illumina-support/documents/documentation/system_documentation/hiseqx/hiseq-x-system-guide-15050091-d.pdf</li></ul>" +
+                "<ul><li><a href=http://support.illumina.com/content/dam/illumina-marketing/documents/products/technotes/hiseq-x-percent-pf-technical-note-770-2014-043.pdf>" +
+                "http://support.illumina.com/content/dam/illumina-marketing/documents/products/technotes/hiseq-x-percent-pf-technical-note-770-2014-043.pdf</a></li>" +
+                "<li><a href=http://support.illumina.com/content/dam/illumina-support/documents/documentation/system_documentation/hiseqx/hiseq-x-system-guide-15050091-d.pdf>" +
+                "http://support.illumina.com/content/dam/illumina-support/documents/documentation/system_documentation/hiseqx/hiseq-x-system-guide-15050091-d.pdf</a></li></ul>" +
                 "<hr />",
 
                 "Using read outputs from high throughput sequencing (HTS) technologies, this tool provides " +
@@ -1040,15 +1065,31 @@ public class CommandLineParserTest {
         final String converted = CommandLineParser.convertFromHtml(input);
         Assert.assertEquals(converted, expected, "common part:\"" + expected.substring(0, lengthOfCommonSubstring(converted, expected)) + "\"\n\n");
     }
+
     @CommandLineProgramProperties(
-            usage = TestParser1.USAGE_SUMMARY + TestParser1.USAGE_DETAILS,
-            usageShort = TestParser1.USAGE_SUMMARY,
+            usage = TestParserFail.USAGE_SUMMARY + TestParserFail.USAGE_DETAILS,
+            usageShort = TestParserFail.USAGE_SUMMARY,
             programGroup = Testing.class
     )
-    protected class TestParser1 extends CommandLineProgram {
+    protected class TestParserFail extends CommandLineProgram {
 
-        static public final String USAGE_DETAILS = "blah &blah; blah " ;
-        static public final String USAGE_SUMMARY = "This tool offers....." ;
+        static public final String USAGE_DETAILS = "blah &blah; blah ";
+        static public final String USAGE_SUMMARY = "This tool offers.....";
+
+        @Override
+        protected int doWork() {return 0;}
+    }
+
+    @CommandLineProgramProperties(
+            usage = TestParserSucceed.USAGE_SUMMARY + TestParserSucceed.USAGE_DETAILS,
+            usageShort = TestParserSucceed.USAGE_SUMMARY,
+            programGroup = Testing.class
+    )
+
+    protected class TestParserSucceed extends CommandLineProgram {
+
+        static public final String USAGE_DETAILS = "This is the first row <p>And this is the second";
+        static public final String USAGE_SUMMARY = " X &lt; Y ";
 
         @Override
         protected int doWork() {return 0;}
@@ -1056,27 +1097,42 @@ public class CommandLineParserTest {
 
     @Test(expectedExceptions = AssertionError.class)
     public void testNonAsciiAssertion() {
-        TestParser1 testparser1 = new TestParser1();
-        testparser1.parseArgs(new String[]{});
-        OutputStream outputStream = new OutputStream()
-        {
+        TestParserFail testparserFail = new TestParserFail();
+        testparserFail.parseArgs(new String[]{});
 
-            @Override
-            public void write(final int b) throws IOException {
+        PrintStream stream = new PrintStream(new NullOutputStream());
+        testparserFail.getCommandLineParser().usage(stream, true);
+    }
 
-            };
-        };
-        PrintStream stream = new PrintStream(outputStream);
+    @Test
+    public void testNonAsciiConverted() {
+        TestParserSucceed testparserSucceed = new TestParserSucceed();
+        testparserSucceed.parseArgs(new String[]{});
 
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        PrintStream stream = new PrintStream(byteArrayOutputStream);
+        testparserSucceed.getCommandLineParser().usage(stream, true);
 
-        testparser1.getCommandLineParser().usage(stream, true);
+        String expected = "USAGE: TestParserSucceed [options]\n" +
+                "\n" +
+                "Documentation: http://broadinstitute.github.io/picard/command-line-overview.html#TestParserSucceed\n" +
+                "\n" +
+                " X < Y This is the first row \n" +
+                "And this is the second";
+        Assert.assertEquals(byteArrayOutputStream.toString().substring(0, expected.length()), expected);
     }
 
     static private int lengthOfCommonSubstring(String lhs, String rhs) {
         int i = 0;
-        while (i < Math.min(lhs.length(), rhs.length()) && lhs.charAt(i) == rhs.charAt(i)) {
-            i++;
-        }
+        while (i < Math.min(lhs.length(), rhs.length()) && lhs.charAt(i) == rhs.charAt(i)) i++;
+
         return i;
+    }
+
+    private class NullOutputStream extends OutputStream {
+        @Override
+        public void write(final int b) throws IOException {
+
+        }
     }
 }
