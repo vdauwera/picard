@@ -1016,6 +1016,9 @@ public class CommandLineParserTest {
         retval.add(new Object[]{"hi<li>bye", "hi - bye"});
         retval.add(new Object[]{"hi<NOT_A_REAL_TAG>bye", "hibye"});
         retval.add(new Object[]{"</h4><pre>", "\n\n"});
+        retval.add(new Object[]{"<a href=\"http://go.here.org\"> string</ a >", " string (http://go.here.org)"});
+        retval.add(new Object[]{"<a href=\"http://go.here.org\" > string</ a>", " string (http://go.here.org)"});
+        retval.add(new Object[]{"< a href=\"http://go.here.org\"> string<a />", " string (http://go.here.org)"});
 
 
         //for some reason, the next test seems to break intelliJ, but it works on the commandline
@@ -1034,9 +1037,9 @@ public class CommandLineParserTest {
                 "Please see <a href='http://broadinstitute.github.io/picard/picard-metric-definitions.html#AlignmentSummaryMetrics'>" +
                 "the AlignmentSummaryMetrics documentation</a> for detailed explanations of each metric. <br /> <br />" +
                 "Additional information about Illumina's quality filters can be found in the following documents on the Illumina website:" +
-                "<ul><li><a href=http://support.illumina.com/content/dam/illumina-marketing/documents/products/technotes/hiseq-x-percent-pf-technical-note-770-2014-043.pdf>" +
+                "<ul><li><a href=\"http://support.illumina.com/content/dam/illumina-marketing/documents/products/technotes/hiseq-x-percent-pf-technical-note-770-2014-043.pdf\">" +
                 "http://support.illumina.com/content/dam/illumina-marketing/documents/products/technotes/hiseq-x-percent-pf-technical-note-770-2014-043.pdf</a></li>" +
-                "<li><a href=http://support.illumina.com/content/dam/illumina-support/documents/documentation/system_documentation/hiseqx/hiseq-x-system-guide-15050091-d.pdf>" +
+                "<li><a href=\"http://support.illumina.com/content/dam/illumina-support/documents/documentation/system_documentation/hiseqx/hiseq-x-system-guide-15050091-d.pdf\">" +
                 "http://support.illumina.com/content/dam/illumina-support/documents/documentation/system_documentation/hiseqx/hiseq-x-system-guide-15050091-d.pdf</a></li></ul>" +
                 "<hr />",
 

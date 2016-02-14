@@ -359,6 +359,8 @@ public class CommandLineParser {
         //LinkedHashmap since the order matters
         final Map<String,String> regexps = new LinkedHashMap<>();
 
+        regexps.put("< *a *href=[\'\"](.*?)[\'\"] *>(.*?)</ *a *>","$2 ($1)");
+        regexps.put("< *a *href=[\'\"](.*?)[\'\"] *>(.*?)< *a */>","$2 ($1)");
         regexps.put("</ *(br|p|table|h[1-4]|pre|hr|li|ul) *>","\n");
         regexps.put("< *(br|p|table|h[1-4]|pre|hr|li|ul) */>","\n");
         regexps.put("< *(p|table|h[1-4]|ul|pre) *>","\n");
