@@ -53,18 +53,20 @@
 <div class="wrapper">
     {% include header.html %}
 
-    <h2>Explain Base Qualities</h2>
+    <h2>Decoding Base Qualities</h2>
     <section>
 
-		<p>This utility makes it easy to convert between base qualities in ASCII (FASTQ) and Phred-scale integers.
+		<p>This utility makes it easy to convert between base quality values encoded in ASCII (as recorded in a FASTQ or SAM file) and their integer values (representing the Phred-scaled probability that each base call is correct, as explained <a href="https://www.broadinstitute.org/gatk/documentation/article?id=4260">here</a>).
 		<br />
-		<small>See the <a href="https://en.wikipedia.org/wiki/FASTQ_format#Encoding">FASTQ format</a> for more details on encoding types. </small></p>
+		<small>Note that base qualities can use different encoding scales depending on the origin of the sequence data. See the <a href="https://en.wikipedia.org/wiki/FASTQ_format#Encoding">FASTQ format</a> documentation for more details on encoding scales.</small>
+		</p>
+		<p>To convert from ASCII to an integer value,  and click "From ASCII". To convert </p>
 
 		<form onSubmit="convert(this.submitted); return false;" action="">
-			<input type=submit onclick="this.form.submitted=this.value;" value="From Ascii" />
-			<input type=submit onclick="this.form.submitted=this.value;" value="To Ascii" />
-			<input id="input" type=txtField size=100 /> &nbsp; &nbsp; &nbsp;
-			<br />
+			<input type=submit onclick="this.form.submitted=this.value;" value="From ASCII" /> <input id="input_ascii" type=txtField size=100 /> (ASCII string)
+		</form>
+		<form onSubmit="convert(this.submitted); return false;" action="">
+			<p><input type=submit onclick="this.form.submitted=this.value;" value="To Ascii" /> <input id="input_phred" type=txtField size=100 /> (integers separated by comma)
 		</form>
 		<form onSubmit="setFormat(); return false;" action="">
 			Encoding:
