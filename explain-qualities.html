@@ -60,13 +60,10 @@
 		<p>To convert from ASCII to an integer value, meep meep </p>
 
 		<form onSubmit="convert(this.submitted); return false;" action="">
-			<b>ASCII string: </b><br /><input id="ascii" type=txtField size=100 />
-			<input type=submit onclick="this.form.submitted=this.value;" value="to Phred" />
-		</form>
-		<br />
-		<form onSubmit="convert(this.submitted); return false;" action="">
-			<b>Phred value: </b><br /><input id="phred" type=txtField size=100 />
-			<input type=submit onclick="this.form.submitted=this.value;" value="to ASCII" />
+			<input type=submit onclick="this.form.submitted=this.value;" value="ASCII to Phred" />
+			<input type=submit onclick="this.form.submitted=this.value;" value="Phred to ASCII" />
+			<input id="input" type=txtField size=100 /> &nbsp; &nbsp; &nbsp;
+			<br />
 		</form>
 		<form onSubmit="setFormat(); return false;" action="">
 			Encoding:
@@ -77,6 +74,10 @@
 			<input type="radio" name="format" value=4>Illumina 1.8+</input>
 			<br />
 		</form>
+		<p id="output">
+			<strong>Result: </strong>
+		</p>
+		<br />
 
 	</section>
 
