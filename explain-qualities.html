@@ -69,11 +69,6 @@
 			<br />
 		</form>
 		<br />
-		<p id="output">
-			<strong>Result: </strong>
-		</p>
-		<br />
-		<p>Base qualities can use different encoding scales depending on the origin of the sequence data.</p>
 		<form onSubmit="setFormat(); return false;" action="">
 			Encoding:
 			<input checked type="radio" name="format" value=0>Sanger</input>
@@ -84,6 +79,10 @@
 			<br />
 		</form>
 		<p><small>See the <a href="https://en.wikipedia.org/wiki/FASTQ_format#Encoding">FASTQ format</a> documentation for more details on encoding scales.</small></p>
+		<br />
+		<p id="output">
+			<strong>Result: </strong>
+		</p>
 
 	</section>
 
