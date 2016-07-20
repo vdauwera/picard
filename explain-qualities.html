@@ -60,7 +60,7 @@
 
 
 
-		<h4>Enter the ASCII string or Phred value you want to convert in the box below.<br /><small>The result will be displayed below. Multiple Phred values can be entered separated by commas.</small></h4>
+		<h4>Enter the ASCII string or Phred value you want to convert in the box below.<br /><small>Multiple Phred values can be entered separated by commas.</small></h4>
 		<form onSubmit="convert(this.submitted); return false;" action="">
 			<input id="input" type=txtField size=100 /> &nbsp; &nbsp; &nbsp;
 			<br />
@@ -70,7 +70,7 @@
 		</form>
 		<br />
 		<form onSubmit="setFormat(); return false;" action="">
-			Encoding:
+			<strong>Encoding: </strong>
 			<input checked type="radio" name="format" value=0>Sanger</input>
 			<input type="radio" name="format" value=1>Solexa</input>
 			<input type="radio" name="format" value=2>Illumina 1.3+</input>
@@ -79,7 +79,7 @@
 			<br />
 		</form>
 		<p><small>See the <a href="https://en.wikipedia.org/wiki/FASTQ_format#Encoding">FASTQ format</a> documentation for more details on encoding scales.</small></p>
-		<br />
+
 		<p id="output">
 			<strong>Result: </strong>
 		</p>
