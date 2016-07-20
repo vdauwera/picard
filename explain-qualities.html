@@ -60,8 +60,7 @@
 
 
 
-		<h4>Enter the ASCII string or Phred value you want to convert in the box below.</h4>
-
+		<h4>Enter the ASCII string or Phred value you want to convert in the box below.<br /><small>The result will be displayed below. Multiple Phred values can be entered separated by commas.</small></h4>
 		<form onSubmit="convert(this.submitted); return false;" action="">
 			<input id="input" type=txtField size=100 /> &nbsp; &nbsp; &nbsp;
 			<br />
@@ -69,7 +68,6 @@
 			<input type=submit onclick="this.form.submitted=this.value;" value="Phred to ASCII" />
 			<br />
 		</form>
-		<p><small>The result will be displayed below. Multiple Phred values can be entered separated by commas.</small></p>
 		<br />
 		<p id="output">
 			<strong>Result: </strong>
