@@ -58,15 +58,6 @@
 
 		<p>This utility makes it easy to convert between base quality values encoded in ASCII (as recorded in a FASTQ or SAM file) and their integer values representing the Phred-scaled probability that each base call is correct (as explained <a href="https://www.broadinstitute.org/gatk/documentation/article?id=4260">here</a>).</p>
 
-		<h4>Enter the ASCII string or Phred value you want to convert in the box below:<br /><small>Multiple Phred values can be entered separated by commas.</small></h4>
-		<form onSubmit="convert(this.submitted); return false;" action="">
-			<input id="input" type=txtField size=100 /> &nbsp; &nbsp; &nbsp;
-			<br />
-			<input type=submit onclick="this.form.submitted=this.value;" value="ASCII to Phred" />
-			<input type=submit onclick="this.form.submitted=this.value;" value="Phred to ASCII" />
-			<br />
-		</form>
-		<br />
 		<form onSubmit="setFormat(); return false;" action="">
 			<strong>Select encoding scale: </strong><br />
 			<input checked type="radio" name="format" value=0>Sanger</input>
@@ -77,6 +68,15 @@
 			<br />
 		</form>
 		<p><small>See the <a href="https://en.wikipedia.org/wiki/FASTQ_format#Encoding">FASTQ format</a> documentation for more details on encoding scales.</small></p>
+
+		<h4>Enter the ASCII string or Phred value you want to convert in the box below:<br /><small>Multiple Phred values can be entered separated by commas.</small></h4>
+		<form onSubmit="convert(this.submitted); return false;" action="">
+			<input id="input" type=txtField size=100 /> &nbsp; &nbsp; &nbsp;
+			<br />
+			<input type=submit onclick="this.form.submitted=this.value;" value="ASCII to Phred" />
+			<input type=submit onclick="this.form.submitted=this.value;" value="Phred to ASCII" />
+			<br />
+		</form>
 
 		<hr />
 
