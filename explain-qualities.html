@@ -56,8 +56,11 @@
 	<h2>Decoding Base Qualities</h2>
 	<section>
 
-		<p>This utility makes it easy to convert between base quality values encoded in ASCII (as recorded in a FASTQ or SAM file) and their integer values representing the Phred-scaled probability that each base call is correct (as explained <a href="https://www.broadinstitute.org/gatk/documentation/article?id=4260">here</a>). Note that base qualities can use different encoding scales depending on the origin of the sequence data. See the <a href="https://en.wikipedia.org/wiki/FASTQ_format#Encoding">FASTQ format</a> documentation for more details on encoding scales.</p>
-		<p>Enter the ASCII string or Phred value you want to convert in the box below (multiple Phred values can be entered separated by commas). The result will be displayed below.</p>
+		<p>This utility makes it easy to convert between base quality values encoded in ASCII (as recorded in a FASTQ or SAM file) and their integer values representing the Phred-scaled probability that each base call is correct (as explained <a href="https://www.broadinstitute.org/gatk/documentation/article?id=4260">here</a>).</p>
+
+		<p>Note that base qualities can use different encoding scales depending on the origin of the sequence data. See the <a href="https://en.wikipedia.org/wiki/FASTQ_format#Encoding">FASTQ format</a> documentation for more details on encoding scales.</p>
+
+		<p><b>Enter the ASCII string or Phred value you want to convert in the box below.</b> Multiple Phred values can be entered separated by commas. The result will be displayed below.</p>
 
 		<form onSubmit="convert(this.submitted); return false;" action="">
 			<small>Enter an ASCII string or Phred values separated by commas</small>
@@ -75,6 +78,7 @@
 			<input type="radio" name="format" value=4>Illumina 1.8+</input>
 			<br />
 		</form>
+		<br />
 		<p id="output">
 			<strong>Result: </strong>
 		</p>
